@@ -1,0 +1,5 @@
+# Environment secrets
+.env
+
+# Optional local logs
+logs/
