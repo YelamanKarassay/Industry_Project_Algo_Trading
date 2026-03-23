@@ -259,7 +259,6 @@ def main() -> None:
     config = load_config()
     scheduler = build_scheduler(config, logger)
 
-    scheduler.start(paused=True)
     next_run_hkt = get_next_run_time_hkt(scheduler)
 
     startup_message = (

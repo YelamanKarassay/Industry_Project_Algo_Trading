@@ -99,3 +99,24 @@ On startup, it prints a message with:
 - timezone
 - strategy ID
 - next scheduled fire time
+
+Working On Server:
+
+```
+
+sudo apt update
+sudo apt install -y python3 python3-venv python3-pip git
+
+git clone <your-repo-url>
+cd <your-repo-folder>
+
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+
+cp .env.template .env
+# edit .env with real API_KEY and STRATEGY_ID
+
+python module1_random_sender.py
+
+```
