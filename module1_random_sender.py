@@ -150,7 +150,8 @@ def send_once(config: dict, logger: logging.Logger) -> None:
     }
     payload = build_payload(weight, is_post=(request_type == "POST"))
 
-    for attempt in (1, 2):
+    attempt = 1
+    while attempt <= 2:
         try:
             response = requests.request(
                 method=request_type,
@@ -173,6 +174,14 @@ def send_once(config: dict, logger: logging.Logger) -> None:
                 response_body,
             )
 
+            if request_type == "POST" and status_code == 409:
+                logger.warning("POST returned 409 (holding already exists). Switching to PATCH immediately.")
+                with STATE_LOCK:
+                    FIRST_POST_SENT_TODAY = True
+                request_type = "PATCH"
+                payload = build_payload(weight, is_post=False)
+                continue
+
             response.raise_for_status()
 
             if request_type == "POST":
@@ -187,11 +196,13 @@ def send_once(config: dict, logger: logging.Logger) -> None:
                 weight,
                 str(exc),
             )
-            if attempt == 1:
+            if attempt < 2:
                 logger.warning("Retrying once in 30 seconds...")
                 time.sleep(30)
+                attempt += 1
             else:
                 logger.error("Retry failed. Skipping this decision point.")
+                break
 
 
 def run_scheduled_send(config: dict, logger: logging.Logger) -> None:
